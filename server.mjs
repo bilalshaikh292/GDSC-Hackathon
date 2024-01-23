@@ -1,5 +1,6 @@
 import app from './app.mjs';
 import config from './config.mjs';
+import bodyParser from 'body-parser';
 
 app.use(bodyParser.json());
 
