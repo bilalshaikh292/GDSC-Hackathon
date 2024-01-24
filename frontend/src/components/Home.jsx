@@ -22,7 +22,7 @@ const Home = () => {
       ]);
     }
   }, []);
-
+  
   console.log(files);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -48,19 +48,14 @@ const Home = () => {
       } else if (files.length > 0) {
         const url = "http://localhost:5000/GDSC1";
         const formData = new FormData();
-        // files.forEach((file, index) => {
-        //   formData.append(`image${index + 1}`, file[]);
-        // });
-        formData.append("image", files[0], files[0].name);
+        formData.append("image", files[0]);
         const response = await axios.post(url, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-
-  
         setPredictions(response.data.predictions);
-        setImageToShow(files[0].preview); // Update as needed
+        setImageToShow(files[0].preview);
       }
       setisloading(false);
     } catch (error) {

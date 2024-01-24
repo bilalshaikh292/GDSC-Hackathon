@@ -48,6 +48,7 @@ app.post('/GDSC', async (req, res) => {
 
   app.post('/GDSC1', upload.array('image'), async (req, res) => {
     try {
+      console.log("api clled")
       const images = req.files;
   
       if (!images || images.length === 0) {
@@ -82,7 +83,7 @@ app.post('/GDSC', async (req, res) => {
       console.error('Error:', error.message);
       res.status(500).json({ message: error.message });
     }
-    
+
   });
 
 export default app;
