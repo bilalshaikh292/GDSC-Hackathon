@@ -1,11 +1,31 @@
 import background from "../assets/background.mp4";
 import axios from "axios";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
 
 const Home = () => {
   const [data, setData] = useState({
     imageUrl: "",
+    file: null,
   });
+
+  const [files, setFiles] = useState([]);
+
+  const onDrop = useCallback((acceptedFiles) => {
+    if (acceptedFiles?.length) {
+      setFiles((prev) => [
+        ...prev,
+        ...acceptedFiles.map((file) => ({
+          ...file,
+          preview: URL.createObjectURL(file),
+        })),
+      ]);
+    }
+  }, []);
+
+  console.log(files);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleChange = ({ currentTarget: input }) => {
     setData({ ...data, [input.name]: input.value });
@@ -20,10 +40,28 @@ const Home = () => {
     e.preventDefault();
     try {
       setisloading(true);
-      const url = "http://localhost:5000/GDSC";
-      const response = await axios.post(url, data);
-      setPredictions(response.data.predictions);
-      setImageToShow(data.imageUrl);
+      if (data.imageUrl) {
+        const url = "http://localhost:5000/GDSC";
+        const response = await axios.post(url, { imageUrl: data.imageUrl });
+        setPredictions(response.data.predictions);
+        setImageToShow(data.imageUrl);
+      } else if (files.length > 0) {
+        const url = "http://localhost:5000/GDSC1";
+        const formData = new FormData();
+        // files.forEach((file, index) => {
+        //   formData.append(`image${index + 1}`, file[]);
+        // });
+        formData.append("image", files[0], files[0].name);
+        const response = await axios.post(url, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+  
+        setPredictions(response.data.predictions);
+        setImageToShow(files[0].preview); // Update as needed
+      }
       setisloading(false);
     } catch (error) {
       if (
@@ -51,16 +89,40 @@ const Home = () => {
           <div className="content gap-14">
             <div>
               <h1 className="text-3xl text-center">Welcome</h1>
-              <form onSubmit={handleSubmit} className="flex flex-col">
+              <form onSubmit={handleSubmit} className="flex flex-col items-center">
                 <input
                   type="text"
                   placeholder="imageUrl"
                   name="imageUrl"
                   onChange={handleChange}
                   value={data.imageUrl}
-                  required
                   className="text-black py-3 px-2 w-[350px] rounded-md my-7 border-none outline-none"
                 />
+                <h1 className="text-center my-3">OR</h1>
+                <div {...getRootProps()} style={dropzoneStyles}>
+                  <input {...getInputProps()} />
+
+                  {isDragActive ? (
+                    <p>Drop the files here ...</p>
+                  ) : (
+                    <p>Drag n drop some files here, or click to select files</p>
+                  )}
+                </div>
+                <h1 className="my-4">Preview</h1>
+                <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-10">
+                  {files.map((file) => (
+                    <li
+                      key={file.name}
+                      className="relative h-32 rounded-md shadow-lg"
+                    >
+                      <img src={file.preview} height={100} width={100} />
+
+                      <p className="mt-2 text-neutral-500 text-[12px] font-medium">
+                        {file.name}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
                 {error && <div className="text-red-500">{error}</div>}
                 <button
                   type="submit"
@@ -96,6 +158,15 @@ const Home = () => {
       )}
     </div>
   );
+};
+
+const dropzoneStyles = {
+  border: "2px dashed #cccccc",
+  borderRadius: "4px",
+  padding: "20px",
+  textAlign: "center",
+  cursor: "pointer",
+  width: "500px",
 };
 
 export default Home;
