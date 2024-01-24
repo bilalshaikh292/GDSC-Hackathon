@@ -5,6 +5,7 @@ import axios from 'axios';
 const app = express();
 
 app.use(cors());
+app.use(express.json())
 
 app.get("/",(req,res) => {
     res.send("Hello World") 
@@ -15,13 +16,13 @@ app.post('/GDSC', async (req, res) => {
     try {
       const imageUrl = req.body.imageUrl; 
 
-      const predictionEndpoint =  process.env.AZUREENDPOINTURL + 'customvision/v3.0';
+      const predictionEndpoint =  process.env.AZUREENDPOINTURL;
       const predictionKey =  process.env.APIKEY;
   
       const response = await axios.post(
         predictionEndpoint,
         {
-          Url:imageUrl,
+          Url: imageUrl,
         },
         {
           headers: {
