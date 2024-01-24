@@ -13,19 +13,19 @@ app.get("/",(req,res) => {
  
 app.post('/GDSC', async (req, res) => {
     try {
-      //const imageUrl = req.body.imageUrl; 
+      const imageUrl = req.body.imageUrl; 
 
-      const predictionEndpoint =  process.env.AZUREENDPOINT + 'customvision/v3.0';
+      const predictionEndpoint =  process.env.AZUREENDPOINTURL + 'customvision/v3.0';
       const predictionKey =  process.env.APIKEY;
   
       const response = await axios.post(
-        'LINK TO API',
+        predictionEndpoint,
         {
-          Url: "https://images.unsplash.com/photo-1616012480717-fd9867059ca0?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8eCUyMHJheXxlbnwwfHwwfHx8MA%3D%3D",
+          Url:imageUrl,
         },
         {
           headers: {
-            'Prediction-Key': 'YOUR SECRET Key',
+            'Prediction-Key': predictionKey,
             'Content-Type': 'application/json',
           },
         }
