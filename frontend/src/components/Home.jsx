@@ -71,15 +71,18 @@ const Home = () => {
               </form>
             </div>
             <div>
-              <h2 className="text-xl mt-4">Predictions:</h2>
-              <img
-                src={imageToShow}
-                alt="Uploaded"
-                className="my-4 max-w-[500px] max-h-[500px] object-contain"
-              />
+              <h2 className="text-xl mt-4 text-center">Results.</h2>
+              {predictions.length > 0 && (
+                <img
+                  src={imageToShow}
+                  alt="Uploaded"
+                  className="my-4 max-w-[500px] max-h-[500px] object-contain"
+                />
+              )}
+
               <ul>
                 {predictions.map((prediction, index) => (
-                  <li key={index}>
+                  <li key={index} className="text-center text-lg">
                     <strong>{prediction.tagName}:</strong>{" "}
                     {Math.round(prediction.probability * 100)}%
                   </li>
