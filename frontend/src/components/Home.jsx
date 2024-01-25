@@ -1,40 +1,36 @@
 import background from "../assets/background.mp4";
 import axios from "axios";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 const Home = () => {
+  const [isloading, setisloading] = useState(false);
+  const [imageToShow, setImageToShow] = useState("");
+  const [error, setError] = useState("");
+  const [predictions, setPredictions] = useState([]);
+  const [file, setFile] = useState(null);
+
   const [data, setData] = useState({
     imageUrl: "",
     file: null,
   });
 
-  const [files, setFiles] = useState([]);
+  // const [files, setFiles] = useState([]);
 
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles?.length) {
-      setFiles((prev) => [
-        ...prev,
-        ...acceptedFiles.map((file) => ({
-          ...file,
-          preview: URL.createObjectURL(file),
-        })),
-      ]);
-    }
-  }, []);
+  const onDrop = (acceptedFiles) => {
+    const selectedFile = acceptedFiles[0];
+    setFile(selectedFile);
+  };
 
-  console.log(files);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: "image/*",
+  });
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-
+  isDragActive;
   const handleChange = ({ currentTarget: input }) => {
     setData({ ...data, [input.name]: input.value });
   };
-
-  const [isloading, setisloading] = useState(false);
-  const [imageToShow, setImageToShow] = useState("");
-  const [error, setError] = useState("");
-  const [predictions, setPredictions] = useState([]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,17 +41,21 @@ const Home = () => {
         const response = await axios.post(url, { imageUrl: data.imageUrl });
         setPredictions(response.data.predictions);
         setImageToShow(data.imageUrl);
-      } else if (files.length > 0) {
-        const url = "http://localhost:5000/GDSC1";
+      } else if (file) {
+        const endpoint =
+          "https://gdsccustomvission-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/ffa9eb29-7aec-4195-bb1f-e44ae3c639fd/classify/iterations/GDSC%20X-ray%20model/image";
         const formData = new FormData();
-        formData.append("image", files[0]);
-        const response = await axios.post(url, formData, {
+        formData.append("image", file);
+
+        const response = await axios.post(endpoint, formData, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Prediction-Key": "05a818d2768d4de39e1eb779332509b3",
+            "Content-Type": "application/octet-stream",
           },
         });
+
         setPredictions(response.data.predictions);
-        setImageToShow(files[0].preview);
+        setImageToShow(URL.createObjectURL(file));
       }
       setisloading(false);
     } catch (error) {
@@ -69,6 +69,7 @@ const Home = () => {
       }
     }
   };
+
   return (
     <div className="flex">
       {isloading ? (
@@ -97,36 +98,28 @@ const Home = () => {
                   className="text-black py-3 px-2 w-[350px] rounded-md my-7 border-none outline-none"
                 />
                 <h1 className="text-center my-3">OR</h1>
+
                 <div {...getRootProps()} style={dropzoneStyles}>
                   <input {...getInputProps()} />
-
                   {isDragActive ? (
                     <p>Drop the files here ...</p>
                   ) : (
                     <p>Drag n drop some files here, or click to select files</p>
                   )}
                 </div>
-                <h1 className="my-4">Preview</h1>
-                <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-10">
-                  {files.map((file) => (
-                    <li
-                      key={file.name}
-                      className="relative h-32 rounded-md shadow-lg"
-                    >
-                      <img src={file.preview} height={100} width={100} />
 
-                      <p className="mt-2 text-neutral-500 text-[12px] font-medium">
-                        {file.name}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+                {file && (
+                  <div>
+                    <img className="my-5 rounded-lg w-[100px] h-[100px]" src={URL.createObjectURL(file)} alt="Selected" />
+                  </div>
+                )}
+
                 {error && <div className="text-red-500">{error}</div>}
                 <button
                   type="submit"
                   className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
                 >
-                  Upload
+                  Test
                 </button>
               </form>
             </div>
@@ -136,7 +129,7 @@ const Home = () => {
                 <img
                   src={imageToShow}
                   alt="Uploaded"
-                  className="my-4 max-w-[500px] max-h-[500px] object-contain"
+                  className="my-4 w-[350px] h-[350px] object-contain"
                 />
               )}
 
@@ -167,6 +160,7 @@ const dropzoneStyles = {
   textAlign: "center",
   cursor: "pointer",
   width: "500px",
+  marginBottom:"20px"
 };
 
 export default Home;

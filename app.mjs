@@ -46,25 +46,23 @@ app.post('/GDSC', async (req, res) => {
     }
   });
 
-  app.post('/GDSC1', upload.array('image'), async (req, res) => {
+  app.post('/GDSC1', upload.single('image'), async (req, res) => {
     try {
-      console.log("api clled")
-      const images = req.files;
+      const image = req.file;
   
-      if (!images || images.length === 0) {
-        return res.status(400).json({ message: 'No files uploaded.' });
+      if (!image) {
+        return res.status(400).json({ message: 'No file uploaded.' });
       }
-  
-      const formData = new FormData();
-      images.forEach((image, index) => {
-        formData.append(`image${index + 1}`, image.buffer, {
-          filename: image.originalname,
-        });
-      });
-  
-      // Continue with Azure API call
+
       const predictionEndpoint = process.env.AZUREENDPOINTURL;
       const predictionKey = process.env.APIKEY;
+
+      const formData = new FormData();
+      formData.append('image', image.buffer, {
+        filename: image.originalname,
+      });
+  
+
   
       const response = await axios.post(
         predictionEndpoint,
@@ -85,5 +83,7 @@ app.post('/GDSC', async (req, res) => {
     }
 
   });
+
+
 
 export default app;
