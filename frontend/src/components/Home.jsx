@@ -22,7 +22,7 @@ const Home = () => {
       ]);
     }
   }, []);
-  
+
   console.log(files);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -84,7 +84,10 @@ const Home = () => {
           <div className="content gap-14">
             <div>
               <h1 className="text-3xl text-center">Welcome</h1>
-              <form onSubmit={handleSubmit} className="flex flex-col items-center">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col items-center"
+              >
                 <input
                   type="text"
                   placeholder="imageUrl"
@@ -140,15 +143,17 @@ const Home = () => {
               <ul>
                 {predictions.map((prediction, index) => (
                   <li key={index} className="text-center text-lg">
-                    <strong>{prediction.tagName}:</strong>{" "}
-                    {Math.round(prediction.probability * 100)}%
+                    {Math.round(prediction.probability * 100) > 0 && (
+                      <>
+                        <strong>{prediction.tagName}:</strong>{" "}
+                        {Math.round(prediction.probability * 100)}%
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-          {/* <div className="content"></div>
-          <div></div> */}
         </div>
       )}
     </div>
